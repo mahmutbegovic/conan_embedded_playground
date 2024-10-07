@@ -1,0 +1,13 @@
+[requires]
+stm32f072_platform/1.0
+
+[tool_requires]
+arm-toolchain/13.3
+renode/1.15.3
+
+[generators]
+CMakeDeps
+CMakeToolchain
+
+[layout]
+cmake_layout

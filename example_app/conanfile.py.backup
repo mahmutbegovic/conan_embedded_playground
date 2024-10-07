@@ -1,0 +1,34 @@
+from conan import ConanFile
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+
+
+class CppAppExample(ConanFile):
+    name = "cpp_app"
+    version = "1.1"
+
+    author = "Amar Mahmutbegovic amar@semblie.com"
+
+    # Binary configuration
+    settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+
+    # Sources are located in the same place as this recipe, copy them to the recipe
+    exports_sources = "CMakeLists.txt", "app/*"
+
+    generators = "CMakeToolchain", "CMakeDeps"
+
+    def layout(self):
+        cmake_layout(self)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/3.26.5")
+        self.tool_requires("renode/1.15.3")
+
+    def requirements(self):
+        self.requires("stm32f072_platform/1.0")
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()

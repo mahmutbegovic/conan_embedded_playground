@@ -1,0 +1,71 @@
+import os
+from conan import ConanFile
+from conan.tools.files import get, copy, download
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+
+class RenodePackage(ConanFile):
+    name = "renode"
+    version = "1.15.3"
+
+    license = "MIT"
+    homepage = "https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads"
+    description = "Renode was created by Antmicro as a virtual development tool for multi-node embedded networks (both wired and wireless) and is intended to enable a scalable workflow for creating effective, tested and secure IoT systems."
+    settings = "os", "arch", "build_type"
+    package_type = "application"
+
+    exports_sources = "RunRenode.cmake"
+    generators = "CMakeDeps", "CMakeToolchain"
+
+    def _archs32(self):
+        return ["armv6-m"]
+
+    def validate(self):
+        if self.settings.arch != "x86_64" or self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(f"This toolchain is not compatible with {self.settings.os}-{self.settings.arch}. "
+                                            "It can only run on Linux-x86_64.")
+
+        valid_archs = self._archs32()
+        if self.settings_target.os != "baremetal" or self.settings_target.arch not in valid_archs:
+            raise ConanInvalidConfiguration(f"This toolchain only supports building for Linux-{valid_archs.join(',')}. "
+                                           f"{self.settings_target.os}-{self.settings_target.arch} is not supported.")
+
+        if self.settings_target.compiler != "gcc":
+            raise ConanInvalidConfiguration(f"The compiler is set to '{self.settings_target.compiler}', but this "
+                                            "toolchain only supports building with gcc.")
+
+        if Version(self.settings_target.compiler.version) >= Version("14") or Version(self.settings_target.compiler.version) < Version("13"):
+            raise ConanInvalidConfiguration(f"Invalid gcc version '{self.settings_target.compiler.version}'. "
+                                            "Only 13.X versions are supported for the compiler.")
+
+    def source(self):
+        download(self, "https://raw.githubusercontent.com/renode/renode/refs/heads/master/LICENSE", "LICENSE", verify=False)
+
+    def layout(self):
+        cmake_layout(self)
+
+    def build(self):
+        get(self, f"https://github.com/renode/renode/releases/download/v1.15.3/renode-1.15.3.linux-portable.tar.gz",
+            destination="bin", strip_root=True)            
+
+    def package(self):
+        dirs_to_copy = ["bin"]
+        for dir_name in dirs_to_copy:
+            copy(self, pattern=f"{dir_name}/*", src=self.build_folder, dst=self.package_folder, keep_path=True)
+        copy(self, "LICENSE", src=self.build_folder, dst=os.path.join(self.package_folder, "licenses"), keep_path=False)
+        copy(self, "RunRenode.cmake", self.build_folder, self.package_folder)
+
+    def package_id(self):
+        self.info.settings_target = self.settings_target
+        # We only want the ``arch`` setting
+        self.info.settings_target.rm_safe("os")
+        self.info.settings_target.rm_safe("compiler")
+        # self.info.settings_target.rm_safe("build_type")
+
+    def package_info(self):
+        self.cpp_info.bindirs.append(os.path.join(self.package_folder, "renode", "bin"))
+        self.cpp_info.set_property("cmake_file_name", "Renode")
+        self.cpp_info.set_property("cmake_build_modules", ["RunRenode.cmake"])
+        self.cpp_info.set_property("cmake_find_mode", "module")
+

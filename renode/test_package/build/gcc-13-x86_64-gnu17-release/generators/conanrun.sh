@@ -1,0 +1,1 @@
+. "/home/amar/projects/conan_playground/renode/test_package/build/gcc-13-x86_64-gnu17-release/generators/conanrunenv-release-x86_64.sh"
