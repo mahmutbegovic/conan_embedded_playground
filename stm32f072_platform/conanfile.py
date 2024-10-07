@@ -24,6 +24,7 @@ class Stm32f072Platform(ConanFile):
         cmake_layout(self)
 
     def build_requirements(self):
+        self.tool_requires("arm-toolchain/13.3")
         self.tool_requires("cmake/3.26.5")
 
     def build(self):

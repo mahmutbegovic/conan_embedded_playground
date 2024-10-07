@@ -21,8 +21,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         toolchain = "arm-none-eabi"
-        self.run(f"{toolchain}-gcc --version")
-        test_file = os.path.join(self.cpp.build.bindirs[0], "test_package")
         stdout = StringIO()
-        self.run(f"file {test_file}", stdout=stdout)
+        self.run(f"{toolchain}-gcc --version", stdout=stdout)
         assert "Arm GNU Toolchain 13.3.Rel1" in stdout.getvalue()
