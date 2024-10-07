@@ -1,1 +1,0 @@
-. "/home/amar/projects/conan_playground/renode/test_package/build/gcc-13-armv6-m-23-release/generators/deactivate_conanrunenv-release-armv6-m.sh"
