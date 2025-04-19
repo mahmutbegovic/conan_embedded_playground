@@ -1,0 +1,23 @@
+[settings]
+os=baremetal
+arch=armv6-m
+compiler=gcc
+build_type=Release
+compiler.cppstd=23
+compiler.libcxx=libstdc++11
+compiler.version=13
+[buildenv]
+CC=arm-none-eabi-gcc
+CXX=arm-none-eabi-g++
+LD=arm-none-eabi-ld
+OBJCOPY=arm-none-eabi-objcopy
+SIZE=arm-none-eabi-size
+[conf]
+
+tools.build:cxxflags=["-mcpu=cortex-m0", "-mthumb", "-fdata-sections", "-ffunction-sections", "-Wno-address-of-packed-member", "-Wall", "-Wextra", "-Wno-unused-parameter", "-ffat-lto-objects", "-flto", "-Wno-register", "-fno-threadsafe-statics", "-fno-exceptions", "-fno-rtti"]
+
+tools.build:cflags=["-mcpu=cortex-m0", "-mthumb", "-fdata-sections", "-ffunction-sections", "-Wno-address-of-packed-member", "-Wall", "-Wextra", "-Wno-unused-parameter", "-ffat-lto-objects", "-flto"]
+
+tools.build:exelinkflags=["-mcpu=cortex-m0", "-mthumb", "-Wl,--gc-sections", "-Wl,--no-warn-rwx-segments", "-specs=nosys.specs", "-specs=nano.specs"]
+
+tools.build:defines=["USE_HAL_DRIVER", "STM32F072xB"]
